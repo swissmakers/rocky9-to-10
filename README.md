@@ -1,8 +1,8 @@
-# Rocky Linux 9 to Rocky Linux 10 Upgrade Tool
+# Rocky Linux 9 to Rocky Linux 10 Migration Tool
 
-[Swissmakers GmbH](https://swissmakers.ch) maintains **rocky10-upgrade.sh**, a shell tool that automates a best-effort major-version upgrade from Rocky Linux 9 to Rocky Linux 10. Major releases of the Rocky Linux family are normally addressed with clean installs. Use this miragtion path only when you understands how our tool works, by reading the source and have verified backups.
-
-This document describes prerequisites, the two-phase workflow, optional environment variables, and post-upgrade checks. Command-line options are authoritative; run `./rocky10-upgrade.sh --help` on the target system for the embedded help text.
+Swissmakers GmbH maintains rocky10-upgrade.sh, a shell tool that automates the major-version upgrade process from Rocky Linux 9 to Rocky Linux 10, providing a best-effort solution. Clean installs are normally used for major releases of the Rocky Linux family. Only use this migration path if you understand how our tool works, have read the source code and have verified backups.
+ 
+This document describes the prerequisites, two-phase workflow, optional environment variables and post-upgrade checks. Command-line options take precedence; run ./rocky10-upgrade.sh --help on the target system to view the embedded help text.
 
 ## Prerequisites
 
