@@ -181,10 +181,10 @@ run_audit() {
 		deps)
 			echo "================================================================================"
 			if [[ "$REMOVE_EL9_RPMS" -eq 1 ]]; then
-				echo "Removal of all installed el9-tagged packages:"
+				echo "Removal of all installed el9-tagged packages with their dependencies:"
 			else
-				echo "Removal simulation (of all installed el9-tagged packages):"
-				echo "  Shows what dnf would remove if you removed every installed el9-tagged RPM."
+				echo "Removal simulation (of all installed el9-tagged packages with their dependencies):"
+				echo "  Shows what dnf would remove if you do a full cleanup of your system."
 				echo "  Nothing is changed on disk, it's a transaction preview only!"
 			fi
 			echo "================================================================================"
@@ -216,8 +216,7 @@ run_audit() {
 				echo "dnf remove -y finished."
 				return 0
 			fi
-			echo "To inspect reverse dependencies for one package (what depends on it):"
-			echo "  dnf repoquery --whatrequires --installed <name>   # or: rpm -q --whatrequires <name>"
+			echo "To fully cleanup your system, you can use the command as before with adding --remove-el9-rpms"
 			;;
 		errors)
 			echo "================================================================================"
@@ -505,8 +504,9 @@ run_full_upgrade_refresh() {
 	dnf upgrade --refresh -y
 	if ! dnf needs-restarting -r &>/dev/null; then
 		log "System reports a reboot is required before major upgrade."
-		log "Reboot now, then re-run this script: $0"
+		log "Rebooting now, then re-run the tool: $0"
 		die "Reboot required after updates (kernel/systemd/glibc may have changed)."
+		reboot
 	fi
 }
 
@@ -815,10 +815,11 @@ write_marker_and_reboot() {
 	date -Iseconds >"$MARKER_FILE"
 	log "Wrote marker $MARKER_FILE for optional post-reboot phase."
 	touch /.autorelabel
-	log "Created /.autorelabel -> on next boot we will run a full SELinux filesystem relabel to apply Rocky Linux 10 default contexts (this may take a while)."
+	log "Created /.autorelabel -> on next boot we will run a full SELinux filesystem relabel to apply Rocky Linux 10 default contexts."
 	log "Rebooting into Rocky Linux 10..."
+	echo ""
 	echo "################################################################################"
-	echo "-> Please restart the migration script once again after the reboot"
+	echo "-> Please restart the migration tool again after reboot to continue with phase 2"
 	echo "################################################################################"
 	sleep 5
 	systemctl reboot || reboot
@@ -854,7 +855,7 @@ WTXT
 }
 
 post_distro_sync_sssd_helpers() {
-	log "Post-distro-sync: Executing SSSD restart (if service is present)"
+	log "Post-distro-sync: Executing SSSD restart (if installed)"
 	if systemctl cat sssd.service &>/dev/null; then
 		systemctl try-restart sssd.service 2>/dev/null || warn "systemctl try-restart sssd.service failed"
 		log "Ran: systemctl try-restart sssd.service"
@@ -1048,8 +1049,7 @@ run_phase2_cleanup() {
 
 Final steps (after reboot):
   - Review old and new repo definitions from /etc/yum.repos.d. The original repo definitions were
-    stored in a backup under:
-    ${backup_hint:-not automatically detected; look under /root/yum.repos.d.backup-*}).
+    stored as a backup under: ${backup_hint:-not automatically detected; look under /root/yum.repos.d.backup-*}
   - Review / cleanup your system with --audit packages | deps | errors | selinux
 
 EOF
